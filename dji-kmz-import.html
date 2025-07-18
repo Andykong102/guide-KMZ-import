@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蓝银草KMZ航线导入指南</title>
+    <script src="https://cdn.tailwindcss.com/3.3.3"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0F172A;
+            --bg-secondary: #1E293B;
+            --text-primary: #FFFFFF;
+            --text-secondary: #94A3B8;
+            --accent-red: #FF4D4F;
+            --accent-green: #10B981;
+            --accent-blue: #3B82F6;
+            --accent-yellow: #FBBF24;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .warning-box {
+            background-color: rgba(30, 41, 59, 0.8);
+            border-left: 4px solid var(--accent-red);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.9; }
+            100% { opacity: 1; }
+        }
+
+        .image-container {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            width: 60%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-link {
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+
+        .nav-link:hover {
+            color: var(--accent-blue);
+            transform: translateX(4px);
+        }
+
+        .mobile-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background-color: var(--bg-secondary);
+        }
+
+        .mobile-menu.active {
+            max-height: 500px;
+        }
+
+        .scrollable-image-container {
+            border-radius: 8px;
+            overflow: auto;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        .max-width-full {
+            max-width: 100%;
+        }
+
+        h1, h2, h3 {
+            color: var(--accent-red);
+        }
+
+        .text-gray-700 {
+            color: var(--text-secondary);
+        }
+
+        .text-blue-500 {
+            color: var(--accent-blue);
+        }
+
+        .text-green-500 {
+            color: var(--accent-green);
+        }
+
+        .bg-blue-50 {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .bg-white {
+            background-color: var(--bg-secondary);
+        }
+
+        .border-gray-100 {
+            border-color: var(--border);
+        }
+
+        .bg-gray-50 {
+            background-color: var(--bg-secondary);
+        }
+
+        /* 新增折叠样式 */
+        .collapsible-section .collapse-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0 8px;
+            transition: transform 0.2s ease;
+        }
+        .collapsible-section .collapse-btn:hover {
+            transform: scale(1.1);
+        }
+        .collapsible-section .collapse-content {
+            transition: all 0.3s ease;
+        }
+        .collapsible-section .collapse-content.hidden {
+            display: none;
+        }
+
+        /* 水印样式 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ctext x='100' y='100' font-size='24' fill='rgba(255,255,255,0.03)' text-anchor='middle' dominant-baseline='middle' transform='rotate(-45, 100, 100)'%3E1978102.xyz%3C/text%3E%3C/svg%3E");
+            background-size: 200px 200px;
+            background-repeat: repeat;
+            z-index: 9999;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-gray-800 shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-drone-alt text-blue-500 text-xl mr-2"></i>
+                <span class="font-bold text-white">蓝银草KMZ航线导入指南</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#intro" class="nav-link">注意事项</a>
+                <a href="#general-steps" class="nav-link">通用步骤</a>
+                <a href="#screen-remote" class="nav-link">带屏遥控器</a>
+                <a href="#android-remote" class="nav-link">安卓遥控器</a>
+                <a href="#ios-remote" class="nav-link">苹果遥控器</a>
+            </div>
+            <button id="mobileMenuBtn" class="md:hidden text-gray-300">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobileMenu" class="mobile-menu md:hidden">
+            <div class="px-4 py-2">
+                <a href="#intro" class="block py-2 nav-link">注意事项</a>
+                <a href="#general-steps" class="block py-2 nav-link">通用步骤</a>
+                <a href="#screen-remote" class="block py-2 nav-link">带屏遥控器</a>
+                <a href="#android-remote" class="block py-2 nav-link">安卓遥控器</a>
+                <a href="#ios-remote" class="block py-2 nav-link">苹果遥控器</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- 警告提示 -->
+        <section id="intro" class="mb-12">
+            <div class="warning-box p-4 rounded-lg mb-8">
+                <div class="flex items-start">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 mt-1 mr-3"></i>
+                    <div>
+                        <h2 class="text-xl font-bold text-white mb-2">重要注意事项</h2>
+                        <ol class="list-decimal pl-6 space-y-3 text-gray-300">
+                            <li>官方遥控器性能较差，当航点数大于 300 时，导入可能会无反应，此时可使用蓝银草航线（1978102.xyz)的航点拆分功能，将航线拆分成多段，再重新分段导入遥控器。</li>
+                            <li>高性能手机遥控器通常支持 800 个航点，甚至可超过 1000 个航点。超长航线也可以用航点拆分功能。</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 蓝银草航线规划推广 -->
+        <section id="bluegrass-promo" class="mb-12">
+            <div class="glass-card p-6 flex flex-col md:flex-row items-center justify-between">
+                <div class="md:w-1/2 mb-6 md:mb-0 md:pr-6">
+                    <h2 class="text-2xl font-bold text-blue-400 mb-2 flex items-center">
+                        <i class="fas fa-link mr-3"></i>蓝银草免费航线规划
+                    </h2>
+                    <p class="text-gray-300 mb-4">
+                        专业的航线规划工具，支持航点拆分功能，解决遥控器航点数限制问题
+                    </p>
+                    <div class="flex items-center bg-blue-900 p-3 rounded-lg">
+                        <i class="fas fa-globe text-blue-400 mr-3 text-xl"></i>
+                        <a href="http://1978102.xyz" target="_blank" class="text-blue-400 font-medium hover:underline text-lg">
+                            1978102.xyz
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/3 flex justify-center">
+                    <div class="bg-gray-700 p-4 rounded-lg shadow-md border border-gray-600">
+                        <img src="https://space.coze.cn/s/WJViqd1sqY0/?width_heigth=1146x1527" 
+                             alt="蓝银草航线规划二维码" 
+                             class="w-full max-w-[200px] h-auto">
+                        <p class="text-center text-gray-300 mt-2 text-sm">扫码访问蓝银草航线规划</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 通用步骤 -->
+        <section id="general-steps" class="mb-12">
+            <h2 class="text-2xl font-bold text-red-400 mb-6 flex items-center">
+                <i class="fas fa-list-ol text-blue-400 mr-3"></i>
+                在DJI Fly中创建航点任务
+            </h2>
+            
+            <div class="glass-card p-6 mb-8">
+                <ol class="list-decimal pl-6 space-y-3 text-gray-300">
+                    <li>打开 DJI Fly，进入主界面，点击连接引导</li>
+                    <li>点击飞行界面</li>
+                    <li>点击飞行界面左边的航线图标，进入航线图标界面</li>
+                    <li>点击左上角退出按钮，选择保存并退出，遥控器生成自定义航线以便后续覆盖使用</li>
+                </ol>
+                
+                <div class="mt-6">
+                    <p class="text-gray-300 mb-3 text-center">操作步骤图示（从上到下对应步骤1-5）：</p>
+                    <div class="scrollable-image-container overflow-x-auto">
+                        <img src="https://space.coze.cn/s/bdnPxpdwUi0/?width_heigth=5973x4352" 
+                             alt="DJI Fly航点任务创建步骤" class="max-width-full h-auto">
+                    </div>
+                </div>
+                
+                <div class="mt-4 bg-blue-900 p-4 rounded-lg">
+                    <p class="text-blue-300"><i class="fas fa-info-circle mr-2"></i>从蓝银草1978102.xyz中导出的KMZ文件提前改成要替换的文件名，再覆盖原文件</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 大疆带屏遥控器 -->
+        <section id="screen-remote" class="mb-12 collapsible-section">
+            <h2 class="text-2xl font-bold text-red-400 mb-6 flex items-center">
+                <i class="fas fa-gamepad text-blue-400 mr-3"></i>
+                大疆带屏遥控器
+                <button class="ml-auto collapse-btn">
+                    <i class="fas fa-plus text-accent-red"></i>
+                </button>
+            </h2>
+            
+            <div class="collapse-content hidden">
+                <div class="glass-card p-6">
+                    <h3 class="text-xl font-semibold mb-3 text-white">大疆带屏遥控器</h3>
+                    <p class="text-gray-300 mb-4">
+                        <i class="fas fa-info-circle text-blue-400 mr-2"></i>
+                        包含DJI RC（小白控）、DJI RC 2和DJI RC Pro，均为带屏设计，其中DJI RC为早期型号，系统较封闭；DJI RC 2和DJI RC Pro为高性能型号，支持更多功能。
+                    </p>
+                    
+                    <div class="image-container">
+                        <img src="https://space.coze.cn/s/0oltEpOgpng/?width_heigth=798x296" 
+                             alt="大疆带屏遥控器系列" class="w-full h-auto">
+                    </div>
+                    <p class="text-center text-gray-300 mt-2">从左至右：DJI RC、DJI RC 2、DJI RC Pro</p>
+
+                    <div class="mt-6 pt-6 border-t border-gray-600">
+                        <h4 class="text-lg font-medium mb-3 text-white">KMZ文件导入步骤</h4>
+                        <ol class="list-decimal pl-6 space-y-3 text-gray-300">
+                            <li>首先需要插新的SD卡（目的是把航线文件放上面）</li>
+                        </ol>
+                        <p class="text-gray-300 mb-3 text-center">带屏遥控器SD卡文件路径示例：</p>
+                        <div class="image-container mt-4">
+                            <img src="https://space.coze.cn/s/GdxPl1gq1YU/?width_heigth=454x526" 
+                                 alt="带屏遥控器SD卡文件路径" class="w-full h-auto">
+                        </div>
+                        <div class="mt-4 bg-blue-900 p-4 rounded-lg">
+                            <p class="text-blue-300"><i class="fas fa-info-circle mr-2"></i>替换之后再回到手机DJI Fly中，从航点历史任务中选择航线任务开始飞行</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 大疆不带屏遥控器（安卓手机） -->
+        <section id="android-remote" class="mb-12 collapsible-section">
+            <h2 class="text-2xl font-bold text-red-400 mb-6 flex items-center">
+                <i class="fab fa-android text-green-400 mr-3"></i>
+                大疆不带屏遥控器（安卓手机）
+                <button class="ml-auto collapse-btn">
+                    <i class="fas fa-plus text-accent-red"></i>
+                </button>
+            </h2>
+            
+            <div class="collapse-content hidden">
+                <div class="glass-card p-6">
+                    <h3 class="text-xl font-semibold mb-3 text-white">大疆不带屏遥控器安卓手机</h3>
+                    <p class="text-gray-300 mb-4">
+                        <i class="fas fa-info-circle text-blue-400 mr-2"></i>
+                        包含DJI RC N2、DJI RC N3
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="image-container">
+                            <img src="https://space.coze.cn/s/wmBE5LA17Nw/?width_heigth=322x497" 
+     alt="安卓手机作为遥控器" class="w-12 h-auto mx-auto">
+                        </div>
+                        <div>
+                            <p class="text-gray-300 mb-3">
+                                该型号操作步骤与同类产品类似，具体请参考对应系统的操作指南
+                            </p>
+                            <p class="text-gray-300">
+                                使用安卓手机作为遥控器，支持更多自定义设置
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-gray-600">
+                        <h4 class="text-lg font-medium mb-3 text-white">KMZ文件导入步骤</h4>
+                        <ol class="list-decimal pl-6 space-y-3 text-gray-300">
+                            <li>用电脑连接安卓手机或大疆屏控遥控器，替换航线文件</li>
+                            <li>替换文件时要注意文件名必须与原来的文件名相同</li>
+                            <li>若删除原文件，新拷贝进去的文件名必须改成与原文件名相同</li>
+                        </ol>
+                        <div class="image-container mt-4">
+                            <img src="https://space.coze.cn/s/NpRb1k4XoWo/?width_heigth=844x771" 
+                                 alt="安卓手机KMZ文件替换步骤" class="w-full h-auto">
+                        </div>
+                        <div class="mt-4 bg-blue-900 p-4 rounded-lg">
+                            <p class="text-blue-300"><i class="fas fa-info-circle mr-2"></i>替换之后再回到手机DJI Fly中，从航点历史任务中选择航线任务开始飞行</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 大疆不带屏遥控器（苹果手机） -->
+        <section id="ios-remote" class="mb-12 collapsible-section">
+            <h2 class="text-2xl font-bold text-red-400 mb-6 flex items-center">
+                <i class="fab fa-apple text-gray-300 mr-3"></i>
+                大疆不带屏遥控器（苹果手机）
+                <button class="ml-auto collapse-btn">
+                    <i class="fas fa-plus text-accent-red"></i>
+                </button>
+            </h2>
+            
+            <div class="collapse-content hidden">
+                <div class="glass-card p-6">
+                    <h3 class="text-xl font-semibold mb-3 text-white">大疆不带屏遥控器苹果手机</h3>
+                    <p class="text-gray-300 mb-4">
+                        <i class="fas fa-info-circle text-blue-400 mr-2"></i>
+                        包含DJI RC N2、DJI RC N3
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="image-container">
+                            <img src="https://space.coze.cn/s/ljNWPNOW84o/?width_heigth=222x287" 
+     alt="苹果手机作为遥控器" class="w-12 h-auto mx-auto">
+                        </div>
+                        <div>
+                            <p class="text-gray-300 mb-3">
+                                该型号操作步骤与同类产品类似，具体请参考对应系统的操作指南
+                            </p>
+                            <p class="text-gray-300">
+                                使用iPhone作为遥控器，操作流畅性更好
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-gray-600">
+                        <h4 class="text-lg font-medium mb-3 text-white">KMZ文件导入步骤</h4>
+                        <p class="text-gray-300 mb-4">
+                            <i class="fas fa-folder-open text-blue-400 mr-2"></i>
+                            KMZ文件位置：/DJIFly/wayline_mission/，文件目录结构与安卓相同
+                        </p>
+                        <div class="mt-4">
+                            <p class="text-gray-300 mb-3 text-center">苹果手机KMZ文件替换路径示例：</p>
+                            <div class="scrollable-image-container overflow-x-auto">
+                                <img src="https://space.coze.cn/s/o6y8oMh-vVs/?width_heigth=2769x1280" 
+                                     alt="苹果手机KMZ文件替换步骤" class="max-width-full h-auto">
+                            </div>
+                        </div>
+                        <div class="mt-4 bg-blue-900 p-4 rounded-lg">
+                            <p class="text-blue-300"><i class="fas fa-info-circle mr-2"></i>替换之后再回到手机DJI Fly中，从航点历史任务中选择航线任务开始飞行</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 py-6">
+        <div class="container mx-auto px-4 text-center text-gray-400 text-sm">
+
+        </div>
+    </footer>
+
+    <script>
+        // 移动端菜单切换
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.toggle('active');
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // 如果是移动端菜单，点击后关闭菜单
+                    if (window.innerWidth < 768) {
+                        document.getElementById('mobileMenu').classList.remove('active');
+                    }
+                }
+            });
+        });
+
+        // 折叠/展开功能
+        document.querySelectorAll('.collapsible-section').forEach(section => {
+            const btn = section.querySelector('.collapse-btn');
+            const content = section.querySelector('.collapse-content');
+            
+            // 默认折叠状态
+            content.classList.add('hidden');
+            btn.querySelector('i').classList.remove('fa-minus');
+            btn.querySelector('i').classList.add('fa-plus');
+            
+            btn.addEventListener('click', () => {
+                content.classList.toggle('hidden');
+                const icon = btn.querySelector('i');
+                if (content.classList.contains('hidden')) {
+                    icon.classList.remove('fa-minus');
+                    icon.classList.add('fa-plus');
+                } else {
+                    icon.classList.remove('fa-plus');
+                    icon.classList.add('fa-minus');
+                }
+            });
+            
+            // 导航点击时展开对应章节
+            document.querySelectorAll('a[href="#' + section.id + '"]').forEach(link => {
+                link.addEventListener('click', () => {
+                    content.classList.remove('hidden');
+                    const icon = btn.querySelector('i');
+                    icon.classList.remove('fa-plus');
+                    icon.classList.add('fa-minus');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
